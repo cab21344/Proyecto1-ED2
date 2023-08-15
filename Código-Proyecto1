@@ -1,0 +1,43 @@
+#include <Arduino.h> //librería arduino
+#include <ESP32Servo.h> //librería servo
+#include <ESP32WifiManager.h> //librería WIFI
+
+#define pwmChannel 0 //canal para el pwm del servo
+#define ledRChannel 1 //canal pwm led roja
+#define ledGChannel 2 //canal pwm led verde
+#define ledYChannel 3 //canal pwm led amarillo
+#define freqPWM 5000 //frecuencia en Hz
+
+const int servo = 33; //pin servo
+const int boton = 5; //pin boton de medición
+const int ledY = 18; //pin led amarillo
+const int ledG = 19; //pin led verde
+const int ledR = 21; //pin led rojo
+const int temp = 32; //pin de sensor de temp
+
+Servo myservo;
+
+volatile uint8_t contador = 1; // contador para 
+volatile int brillo = 0;
+
+int posicion = 90; //posición inicial
+int sumar = 90; //incremento o decremento de la posición
+
+void setup() {
+  Serial.begin(115200);
+
+  myservo.attach(servo); //setup del servo
+  myservo.write(posicion); //se coloca el servo en esta posición
+
+  pinMode(boton, INPUT_PULLUP); //el boton se nombra como entrada
+  pinMode(boton, INPUT); //el sensor de temp se nombra como entrada
+
+  pinMode(ledY, OUTPUT); //Led amarilla como salida
+  pinMode(ledG, OUTPUT); //led verde como salida
+  pinMode(ledR, OUTPUT); //led roja como salida
+
+}
+
+void loop() {
+
+}

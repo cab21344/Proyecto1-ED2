@@ -1,43 +1,124 @@
+//Electrónica Digital 2 - Proyecto 1
+//María Daniela Cabrera Porras, 21344
+
+// Librerías *****************************************************
+#include "WiFi.h"
 #include <Arduino.h> //librería arduino
 #include <ESP32Servo.h> //librería servo
-#include <ESP32WifiManager.h> //librería WIFI
+#include "display7.h" //librería segmentos
 
+// Canales *******************************************************
 #define pwmChannel 0 //canal para el pwm del servo
 #define ledRChannel 1 //canal pwm led roja
 #define ledGChannel 2 //canal pwm led verde
 #define ledYChannel 3 //canal pwm led amarillo
 #define freqPWM 5000 //frecuencia en Hz
 
-const int servo = 33; //pin servo
-const int boton = 5; //pin boton de medición
-const int ledY = 18; //pin led amarillo
-const int ledG = 19; //pin led verde
-const int ledR = 21; //pin led rojo
-const int temp = 32; //pin de sensor de temp
+//Pines de display ************************************************
+#define pA 23
+#define pB 22
+#define pC 21
+#define pD 19
+#define pE 18
+#define pF 5
+#define pG 4
+#define pdP 2
+
+//Pines de cada display *******************************************
+#define display1 26
+#define display2 27
+#define display3 14
+
+//pines de leds, boton y sensor ***********************************
+const int servo = 25; //pin servo
+const int boton = 33; //pin boton de medición
+const int ledY = 35; //pin led amarillo
+const int ledG = 34; //pin led verde
+const int ledR = 32; //pin led rojo
+const int lm35Pin = 12; //pin LM35
 
 Servo myservo;
-
-volatile uint8_t contador = 1; // contador para 
-volatile int brillo = 0;
-
-int posicion = 90; //posición inicial
-int sumar = 90; //incremento o decremento de la posición
+int posicionV = 180; //posicion en verde
+int posicionA = 90; //posicion en amarillo
+int posicionR = 0; //posicion en rojo
 
 void setup() {
   Serial.begin(115200);
+  WiFi.mode(WIFI_STA);
 
-  myservo.attach(servo); //setup del servo
-  myservo.write(posicion); //se coloca el servo en esta posición
+//configurar servo
+  myservo.attach(servo);
+  myservo.write(posicion);
 
-  pinMode(boton, INPUT_PULLUP); //el boton se nombra como entrada
-  pinMode(boton, INPUT); //el sensor de temp se nombra como entrada
+//configuración sensor de temp y boton ****************************
+  pinMode(lm35Pin, INPUT);
+  pinMode(boton, INPUT_PULLUP);
 
-  pinMode(ledY, OUTPUT); //Led amarilla como salida
-  pinMode(ledG, OUTPUT); //led verde como salida
-  pinMode(ledR, OUTPUT); //led roja como salida
+// configuración canales y pines de leds **************************
+  ledcSetup(ledRChannel, 5000, 8);
+  ledcAttachPin(32, ledRChannel); //se asocia pin rojo con canal rojo
 
+  ledcSetup(ledGChannel, 5000, 8);
+  ledcAttachPin(34, ledGChannel); //se asocia pin verde con canal verde
+
+  ledcSetup(ledYChannel, 5000, 8);
+  ledcAttachPin(35, ledYChannel); //se asocia pin amarillo con canal amarillo
+
+//conf de pines de displays ****************************************
+  confDisplay(pA, pB, pC, pD, pE, pF, pG, pdD);
+
+//se definen los displays como output *****************************
+  pinMode(display1, OUTPUT);
+  pinMode(display2, OUTPUT);
+  pinMode(display3, OUTPUT);
+
+//se apagan los displays ******************************************
+  digitalWrite(display1, LOW);
+  digitalWrite(display2, LOW);
+  digitalWrite(display3, LOW);
 }
 
 void loop() {
+if(digitalRead(boton) == LOW){
+  float temp = analogRead(lm35Pin)*3.3/4095.0*100;
 
+  if(temp<37.0){
+    ledcWrite(ledRChannel, 0); //apaga led roja
+    ledcWrite(ledGChannel, 255); //enciende led verde
+    ledcWrite(ledYChannel, 0); //apaga led amarilla
+    myservo.write(posicionV);
+    delay(500);
+  } else if (temp >== 37.0 && temp < 37.5){
+    ledcWrite(ledRChannel, 0); //apaga led roja
+    ledcWrite(ledGChannel, 0); //apaga led verde
+    ledcWrite(ledYChannel, 255); //enciende led amarilla
+    myservo.write(posicionA);
+    delay(500);
+  } else {
+    ledcWrite(ledRChannel, 255); //enciende led roja
+    ledcWrite(ledGChannel, 0); //apaga led verde
+    ledcWrite(ledYChannel, 0); //apaga led amarilla
+    myservo.write(posicionR);
+    delay(500);
+  }
+}
+/*
+  digitalWrite(display1, HIGH);
+  digitalWrite(display2, LOW);
+  digitalWrite(display3, LOW);
+  desplegarVal(0);
+
+  digitalWrite(display1, LOW);
+  digitalWrite(display2, HIGH);
+  digitalWrite(display3, LOW);
+  desplegarVal(1);
+  desplegarPunto(true);
+
+  digitalWrite(display1, LOW);
+  digitalWrite(display2, LOW);
+  digitalWrite(display3, HIGH);
+  desplegarVal(2);
+
+  // Wait a bit before scanning again
+  delay(5000);*/
 }

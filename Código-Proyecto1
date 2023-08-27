@@ -4,7 +4,6 @@
 // Librerías *****************************************************
 #include "WiFi.h"
 #include <Arduino.h> //librería arduino
-#include <ESP32Servo.h> //librería servo
 #include "display7.h" //librería segmentos
 
 // Canales *******************************************************
@@ -12,7 +11,8 @@
 #define ledRChannel 1 //canal pwm led roja
 #define ledGChannel 2 //canal pwm led verde
 #define ledYChannel 3 //canal pwm led amarillo
-#define freqPWM 5000 //frecuencia en Hz
+#define freqPWM 100 //frecuencia en Hz servo
+#define freqPWMleds 500 //freq en Hz leds
 
 //Pines de display ************************************************
 #define pA 23
@@ -31,38 +31,38 @@
 
 //pines de leds, boton y sensor ***********************************
 const int servo = 25; //pin servo
-const int boton = 33; //pin boton de medición
-const int ledY = 35; //pin led amarillo
-const int ledG = 34; //pin led verde
-const int ledR = 32; //pin led rojo
+const int boton = 4; //pin boton de medición
+const int amarillo = 35; //pin led amarillo
+const int verde = 34; //pin led verde
+const int rojo = 32; //pin led rojo
 const int lm35Pin = 12; //pin LM35
 
-Servo myservo;
 int posicionV = 180; //posicion en verde
 int posicionA = 90; //posicion en amarillo
 int posicionR = 0; //posicion en rojo
 
+int temp = 0; //variable para almacenar temp leída
+
 void setup() {
   Serial.begin(115200);
   WiFi.mode(WIFI_STA);
-
-//configurar servo
-  myservo.attach(servo);
-  myservo.write(posicion);
 
 //configuración sensor de temp y boton ****************************
   pinMode(lm35Pin, INPUT);
   pinMode(boton, INPUT_PULLUP);
 
 // configuración canales y pines de leds **************************
-  ledcSetup(ledRChannel, 5000, 8);
-  ledcAttachPin(32, ledRChannel); //se asocia pin rojo con canal rojo
+  ledcSetup(pwmChannel, freqPWM, 16); //se asocia al pin del servo
+  ledcAttachPin(servo, pwmChannel);
+  
+  ledcSetup(ledRChannel, freqPWMled, 8);
+  ledcAttachPin(rojo, ledRChannel); //se asocia pin rojo con canal rojo
 
-  ledcSetup(ledGChannel, 5000, 8);
-  ledcAttachPin(34, ledGChannel); //se asocia pin verde con canal verde
+  ledcSetup(ledGChannel, freqPWMled, 8);
+  ledcAttachPin(verde, ledGChannel); //se asocia pin verde con canal verde
 
-  ledcSetup(ledYChannel, 5000, 8);
-  ledcAttachPin(35, ledYChannel); //se asocia pin amarillo con canal amarillo
+  ledcSetup(ledYChannel, freqPWMled, 8);
+  ledcAttachPin(amarillo, ledYChannel); //se asocia pin amarillo con canal amarillo
 
 //conf de pines de displays ****************************************
   confDisplay(pA, pB, pC, pD, pE, pF, pG, pdD);

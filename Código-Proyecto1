@@ -83,19 +83,19 @@ if(digitalRead(boton) == LOW){
     ledcWrite(ledRChannel, 0); //apaga led roja
     ledcWrite(ledGChannel, 255); //enciende led verde
     ledcWrite(ledYChannel, 0); //apaga led amarilla
-    //myservo.write(posicionV);
+    setServoAngle(180); // Mover el servo a 180 grados
     delay(500);
   } else if (temp >== 37.0 && temp < 37.5){
     ledcWrite(ledRChannel, 0); //apaga led roja
     ledcWrite(ledGChannel, 0); //apaga led verde
     ledcWrite(ledYChannel, 255); //enciende led amarilla
-    //myservo.write(posicionA);
+    setServoAngle(90); // Mover el servo a 180 grados
     delay(500);
   } else {
     ledcWrite(ledRChannel, 255); //enciende led roja
     ledcWrite(ledGChannel, 0); //apaga led verde
     ledcWrite(ledYChannel, 0); //apaga led amarilla
-    //myservo.write(posicionR);
+    setServoAngle(0); // Mover el servo a 180 grados
     delay(500);
   }
 }
@@ -118,4 +118,9 @@ if(digitalRead(boton) == LOW){
 
   // Wait a bit before scanning again
   delay(5000);*/
+}
+
+void setServoAngle(int angle) {
+  int dutyCycle = map(angle, 0, 180, 40, 115); // Mapear el ángulo a un ciclo de trabajo para el servo
+  ledcWrite(pwmChannel, dutyCycle);
 }

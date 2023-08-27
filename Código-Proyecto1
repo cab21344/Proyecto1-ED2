@@ -3,7 +3,6 @@
 
 // Librerías *****************************************************
 #include "WiFi.h"
-#include <Arduino.h> //librería arduino
 #include "display7.h" //librería segmentos
 
 // Canales *******************************************************
@@ -41,8 +40,6 @@ int posicionV = 180; //posicion en verde
 int posicionA = 90; //posicion en amarillo
 int posicionR = 0; //posicion en rojo
 
-int temp = 0; //variable para almacenar temp leída
-
 void setup() {
   Serial.begin(115200);
   WiFi.mode(WIFI_STA);
@@ -54,14 +51,14 @@ void setup() {
 // configuración canales y pines de leds **************************
   ledcSetup(pwmChannel, freqPWM, 16); //se asocia al pin del servo
   ledcAttachPin(servo, pwmChannel);
-  
-  ledcSetup(ledRChannel, freqPWMled, 8);
+
+  ledcSetup(ledRChannel, freqPWMleds, 8);
   ledcAttachPin(rojo, ledRChannel); //se asocia pin rojo con canal rojo
 
-  ledcSetup(ledGChannel, freqPWMled, 8);
+  ledcSetup(ledGChannel, freqPWMleds, 8);
   ledcAttachPin(verde, ledGChannel); //se asocia pin verde con canal verde
 
-  ledcSetup(ledYChannel, freqPWMled, 8);
+  ledcSetup(ledYChannel, freqPWMleds, 8);
   ledcAttachPin(amarillo, ledYChannel); //se asocia pin amarillo con canal amarillo
 
 //conf de pines de displays ****************************************
@@ -86,19 +83,19 @@ if(digitalRead(boton) == LOW){
     ledcWrite(ledRChannel, 0); //apaga led roja
     ledcWrite(ledGChannel, 255); //enciende led verde
     ledcWrite(ledYChannel, 0); //apaga led amarilla
-    myservo.write(posicionV);
+    //myservo.write(posicionV);
     delay(500);
   } else if (temp >== 37.0 && temp < 37.5){
     ledcWrite(ledRChannel, 0); //apaga led roja
     ledcWrite(ledGChannel, 0); //apaga led verde
     ledcWrite(ledYChannel, 255); //enciende led amarilla
-    myservo.write(posicionA);
+    //myservo.write(posicionA);
     delay(500);
   } else {
     ledcWrite(ledRChannel, 255); //enciende led roja
     ledcWrite(ledGChannel, 0); //apaga led verde
     ledcWrite(ledYChannel, 0); //apaga led amarilla
-    myservo.write(posicionR);
+    //myservo.write(posicionR);
     delay(500);
   }
 }

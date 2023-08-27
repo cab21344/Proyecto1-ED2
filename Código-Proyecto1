@@ -2,8 +2,10 @@
 //María Daniela Cabrera Porras, 21344
 
 // Librerías *****************************************************
+#include <Arduino.h>
 #include "WiFi.h"
 #include "display7.h" //librería segmentos
+#include "driver/ledc.h"
 
 // Canales *******************************************************
 #define pwmChannel 0 //canal para el pwm del servo
@@ -83,19 +85,19 @@ if(digitalRead(boton) == LOW){
     ledcWrite(ledRChannel, 0); //apaga led roja
     ledcWrite(ledGChannel, 255); //enciende led verde
     ledcWrite(ledYChannel, 0); //apaga led amarilla
-    setServoAngle(180); // Mover el servo a 180 grados
+    //myservo.write(posicionV);
     delay(500);
   } else if (temp >== 37.0 && temp < 37.5){
     ledcWrite(ledRChannel, 0); //apaga led roja
     ledcWrite(ledGChannel, 0); //apaga led verde
     ledcWrite(ledYChannel, 255); //enciende led amarilla
-    setServoAngle(90); // Mover el servo a 180 grados
+    //myservo.write(posicionA);
     delay(500);
   } else {
     ledcWrite(ledRChannel, 255); //enciende led roja
     ledcWrite(ledGChannel, 0); //apaga led verde
     ledcWrite(ledYChannel, 0); //apaga led amarilla
-    setServoAngle(0); // Mover el servo a 180 grados
+    //myservo.write(posicionR);
     delay(500);
   }
 }
@@ -118,9 +120,4 @@ if(digitalRead(boton) == LOW){
 
   // Wait a bit before scanning again
   delay(5000);*/
-}
-
-void setServoAngle(int angle) {
-  int dutyCycle = map(angle, 0, 180, 40, 115); // Mapear el ángulo a un ciclo de trabajo para el servo
-  ledcWrite(pwmChannel, dutyCycle);
 }

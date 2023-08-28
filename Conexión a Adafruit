@@ -1,0 +1,66 @@
+#include <Arduino.h>
+#include "config.h"
+
+//boton led ***********************************************************************************************
+void handleMessage(AdafruitIO_Data *data);
+bool estado = false;
+// set up the 'Canal LED' feed
+AdafruitIO_Feed *ledCanal = io.feed("canalLed");
+
+
+//leer temp en adafruit ************************************************************************************
+float temperatura = 0.0;
+// set up the 'Canal temperatura' feed
+AdafruitIO_Feed *tempCanal = io.feed("temperatura");
+
+
+
+
+void setup() {
+  // start the serial connection
+  Serial.begin(115200);
+  // wait for serial monitor to open
+  while(! Serial);
+  Serial.print("Connecting to Adafruit IO");
+
+  //Connect to io.adafruit.com ****************************************************************************
+  io.connect();
+  // cuando se reciba algo de ledCanal se hace:
+  ledCanal->onMessage(handleMessage);
+  // wait for a connection
+  while(io.status() < AIO_CONNECTED) {
+    Serial.print(".");
+    delay(500);
+  }
+  // Que lo obtenga
+  ledCanal->get();
+  // we are connected
+  Serial.println();
+  Serial.println(io.statusText());
+  estado = false;
+}
+
+void loop() {
+  // envia valor de temp a Adafruit ***********************************************************************
+  io.run(); //para que esté conectado al servidor de Adafruit
+  temperatura = random(15,40); //valor de temp 
+  Serial.print("sending -> "); //muestr en el serial monitor que valores manda
+  Serial.println(temperatura);
+  tempCanal->save(temperatura);
+  delay(3000); //cada tres seg mande la temp
+
+
+
+}
+
+//boton led adafruit **************************************************************************************
+void handleMessage(AdafruitIO_Data *data) {
+  Serial.print("received <- ");
+  Serial.println(data->value());
+
+  if(*data->value() == '1'){
+    estado = true;
+  } else{
+    estado = false;
+  }
+}

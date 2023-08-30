@@ -37,7 +37,7 @@ void configurarDisplay7(uint8_t pA, uint8_t pB, uint8_t pC, uint8_t pD, uint8_t 
 //Función para desplegar valor al 7 seg
 void desplegarValor(uint8_t valor){
     switch(valor){
-    case 0:
+    case 0: //config para número 0
       digitalWrite(pinA, HIGH);
       digitalWrite(pinB, HIGH);
       digitalWrite(pinC, HIGH);
@@ -48,7 +48,7 @@ void desplegarValor(uint8_t valor){
       digitalWrite(pindP, LOW);
       break;
           
-    case 1:
+    case 1: //config para número 1
       digitalWrite(pinA, LOW);
       digitalWrite(pinB, HIGH);
       digitalWrite(pinC, HIGH);
@@ -59,7 +59,7 @@ void desplegarValor(uint8_t valor){
       digitalWrite(pindP, LOW);
       break;
 
-    case 2:
+    case 2: //config para número 2
       digitalWrite(pinA, HIGH);
       digitalWrite(pinB, HIGH);
       digitalWrite(pinC, LOW);
@@ -70,7 +70,7 @@ void desplegarValor(uint8_t valor){
       digitalWrite(pindP, LOW);
       break;
 
-    case 3:
+    case 3: //config para número 3
       digitalWrite(pinA, HIGH);
       digitalWrite(pinB, HIGH);
       digitalWrite(pinC, HIGH);
@@ -81,7 +81,7 @@ void desplegarValor(uint8_t valor){
       digitalWrite(pindP, LOW);
       break;
 
-    case 4:
+    case 4: //config para número 4
       digitalWrite(pinA, LOW);
       digitalWrite(pinB, HIGH);
       digitalWrite(pinC, HIGH);
@@ -92,7 +92,7 @@ void desplegarValor(uint8_t valor){
       digitalWrite(pindP, LOW);
       break;
 
-    case 5:
+    case 5: //config para número 5
       digitalWrite(pinA, HIGH);
       digitalWrite(pinB, LOW);
       digitalWrite(pinC, HIGH);
@@ -103,7 +103,7 @@ void desplegarValor(uint8_t valor){
       digitalWrite(pindP, LOW);
       break;
 
-    case 6:
+    case 6: //config para número 6
       digitalWrite(pinA, HIGH);
       digitalWrite(pinB, LOW);
       digitalWrite(pinC, HIGH);
@@ -114,7 +114,7 @@ void desplegarValor(uint8_t valor){
       digitalWrite(pindP, LOW);
       break;
 
-    case 7:
+    case 7: //config para número 7
       digitalWrite(pinA, HIGH);
       digitalWrite(pinB, HIGH);
       digitalWrite(pinC, HIGH);
@@ -125,7 +125,7 @@ void desplegarValor(uint8_t valor){
       digitalWrite(pindP, LOW);
       break;
 
-    case 8:
+    case 8: //config para número 8
       digitalWrite(pinA, HIGH);
       digitalWrite(pinB, HIGH);
       digitalWrite(pinC, HIGH);
@@ -136,7 +136,7 @@ void desplegarValor(uint8_t valor){
       digitalWrite(pindP, LOW);
       break;
 
-    case 9:
+    case 9: //config para número 9
       digitalWrite(pinA, HIGH);
       digitalWrite(pinB, HIGH);
       digitalWrite(pinC, HIGH);

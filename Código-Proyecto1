@@ -1,123 +1,208 @@
-//Electrónica Digital 2 - Proyecto 1
-//María Daniela Cabrera Porras, 21344
+// Electrónica Digital 2 - Proyecto 1
+// María Daniela Cabrera Porras, 21344
 
-// Librerías *****************************************************
+// Librerías ************************************************************************************************
 #include <Arduino.h>
-#include "WiFi.h"
-#include "display7.h" //librería segmentos
+#include "config.h"
+#include "display7.h"
 #include "driver/ledc.h"
+#include "esp_adc_cal.h" //mejor lectura del ADC
+//**********************************************************************************************************
 
-// Canales *******************************************************
-#define pwmChannel 0 //canal para el pwm del servo
-#define ledRChannel 1 //canal pwm led roja
-#define ledGChannel 2 //canal pwm led verde
-#define ledYChannel 3 //canal pwm led amarillo
-#define freqPWM 100 //frecuencia en Hz servo
-#define freqPWMleds 500 //freq en Hz leds
+// Canales **************************************************************************************************
+#define pwmChannel 0      // canal servo
+#define verdeChannel 1    // canal led verde
+#define amarilloChannel 2 // canal led amarilla
+#define rojoChannel 3     // canal led roja
+#define freqLeds 500      // freq en Hz leds
+//**********************************************************************************************************
 
-//Pines de display ************************************************
-#define pA 23
-#define pB 22
-#define pC 21
-#define pD 19
-#define pE 18
-#define pF 5
+// Pines display ********************************************************************************************
+#define pA 21
+#define pB 19
+#define pC 18
+#define pD 5
+#define pE 17
+#define pinF 16
 #define pG 4
 #define pdP 2
 
-//Pines de cada display *******************************************
-#define display1 26
-#define display2 27
-#define display3 14
+#define display1 27
+#define display2 12
+#define display3 13
+//**********************************************************************************************************
 
-//pines de leds, boton y sensor ***********************************
-const int servo = 25; //pin servo
-const int boton = 4; //pin boton de medición
-const int amarillo = 35; //pin led amarillo
-const int verde = 34; //pin led verde
-const int rojo = 32; //pin led rojo
-const int lm35Pin = 12; //pin LM35
+// Pines leds, boton y sensor *******************************************************************************
+const int servoPin = 15;
+const int botonPin = 26;
+const int amarilloPin = 33;
+const int verdePin = 25;
+const int rojoPin = 32;
+const int lm35Pin = 36;
+//**********************************************************************************************************
 
-int posicionV = 180; //posicion en verde
-int posicionA = 90; //posicion en amarillo
-int posicionR = 0; //posicion en rojo
+// Variables ************************************************************************************************
+const int pwmMin = 77;
+const int pwmMax = 255;
 
-void setup() {
+bool medirTemp = false;
+float temp = 0.0;
+//**********************************************************************************************************
+
+// leer temp en adafruit ************************************************************************************
+float temperatura = 0.0;
+// set up the 'Canal temperatura' feed
+AdafruitIO_Feed *tempCanal = io.feed("temperatura");
+//********************************************************************************************************
+
+void setup()
+{
+  // start the serial connection
   Serial.begin(115200);
-  WiFi.mode(WIFI_STA);
+  // wait for serial monitor to open
+  while (!Serial)
+    ;
+  Serial.print("Connecting to Adafruit IO");
 
-//configuración sensor de temp y boton ****************************
+  // Connect to io.adafruit.com ****************************************************************************
+  io.connect();
+  // wait for a connection
+  while (io.status() < AIO_CONNECTED)
+  {
+    Serial.print(".");
+    delay(500);
+  }
+  // we are connected
+  Serial.println();
+  Serial.println(io.statusText());
+  //********************************************************************************************************
+
+  // Configurar boton y sensor como inputs ******************************************************************
   pinMode(lm35Pin, INPUT);
-  pinMode(boton, INPUT_PULLUP);
+  pinMode(botonPin, INPUT_PULLUP);
+  //********************************************************************************************************
 
-// configuración canales y pines de leds **************************
-  ledcSetup(pwmChannel, freqPWM, 16); //se asocia al pin del servo
-  ledcAttachPin(servo, pwmChannel);
+  // Configurar como salida leds ****************************************************************************
+  pinMode(verdePin, OUTPUT);
+  pinMode(amarilloPin, OUTPUT);
+  pinMode(rojoPin, OUTPUT);
+  pinMode(servoPin, OUTPUT);
+  //********************************************************************************************************
 
-  ledcSetup(ledRChannel, freqPWMleds, 8);
-  ledcAttachPin(rojo, ledRChannel); //se asocia pin rojo con canal rojo
+  // Configuración canales y pined de leds y servo ***********************************************************
+  ledcSetup(rojoChannel, freqLeds, 8);
+  ledcAttachPin(rojoPin, rojoChannel); // se asocia pin rojo con canal rojo
+  ledcSetup(verdeChannel, freqLeds, 8);
+  ledcAttachPin(verdePin, verdeChannel); // se asocia pin verde con canal verde
+  ledcSetup(amarilloChannel, freqLeds, 8);
+  ledcAttachPin(amarilloPin, amarilloChannel); // se asocia pin amarillo con canal amarillo
 
-  ledcSetup(ledGChannel, freqPWMleds, 8);
-  ledcAttachPin(verde, ledGChannel); //se asocia pin verde con canal verde
+  ledcSetup(pwmChannel, 50, 10);
+  ledcAttachPin(servoPin, pwmChannel);
+  //********************************************************************************************************
 
-  ledcSetup(ledYChannel, freqPWMleds, 8);
-  ledcAttachPin(amarillo, ledYChannel); //se asocia pin amarillo con canal amarillo
+  // Configurar display de 7 seg
+  configurarDisplay7(pA, pB, pC, pD, pE, pinF, pG, pdP);
 
-//conf de pines de displays ****************************************
-  confDisplay(pA, pB, pC, pD, pE, pF, pG, pdD);
-
-//se definen los displays como output *****************************
   pinMode(display1, OUTPUT);
   pinMode(display2, OUTPUT);
   pinMode(display3, OUTPUT);
-
-//se apagan los displays ******************************************
-  digitalWrite(display1, LOW);
-  digitalWrite(display2, LOW);
-  digitalWrite(display3, LOW);
+  //********************************************************************************************************
 }
 
-void loop() {
-if(digitalRead(boton) == LOW){
-  float temp = analogRead(lm35Pin)*3.3/4095.0*100;
+void loop()
+{
+  // Parte 1, 2 y 3 ******************************************************************************************
+  int estadoBoton = digitalRead(botonPin);
 
-  if(temp<37.0){
-    ledcWrite(ledRChannel, 0); //apaga led roja
-    ledcWrite(ledGChannel, 255); //enciende led verde
-    ledcWrite(ledYChannel, 0); //apaga led amarilla
-    //myservo.write(posicionV);
-    delay(500);
-  } else if (temp >== 37.0 && temp < 37.5){
-    ledcWrite(ledRChannel, 0); //apaga led roja
-    ledcWrite(ledGChannel, 0); //apaga led verde
-    ledcWrite(ledYChannel, 255); //enciende led amarilla
-    //myservo.write(posicionA);
-    delay(500);
-  } else {
-    ledcWrite(ledRChannel, 255); //enciende led roja
-    ledcWrite(ledGChannel, 0); //apaga led verde
-    ledcWrite(ledYChannel, 0); //apaga led amarilla
-    //myservo.write(posicionR);
-    delay(500);
+  if (estadoBoton == LOW)
+
+  {
+    medirTemp = true;
   }
-}
-/*
+
+  if (medirTemp)
+  {
+
+    float valorTemp = analogRead(lm35Pin);
+    Serial.print("ADC: ");
+    Serial.println(valorTemp);
+
+    temperatura = (valorTemp * 3300.0) / (4095.0 * 10.0);
+    temperatura = temperatura + 10;
+    Serial.print("Temperatura: ");
+    Serial.println(temperatura);
+
+    medirTemp = false;
+
+    // envia valor de temp a Adafruit ***********************************************************************
+    io.run();                    // para que esté conectado al servidor de Adafruit
+    Serial.print("sending -> "); // muestr en el serial monitor que valores manda
+    Serial.println(temperatura);
+    tempCanal->save(temperatura);
+    //********************************************************************************************************
+
+  }
+
+  if (temperatura < 37.0)
+  {
+    ledcWrite(rojoChannel, 0);
+    ledcWrite(verdeChannel, 255); // enciende led verde
+    ledcWrite(amarilloChannel, 0);
+
+    int dutyCycle = map(180, 0, 180, 26, 123); // mueve el servo a 180º
+    ledcWrite(pwmChannel, dutyCycle);
+    delay(5); // debounce
+  }
+  else if (temperatura >= 37.0 && temperatura < 37.5)
+  {
+    ledcWrite(rojoChannel, 0);
+    ledcWrite(verdeChannel, 0);
+    ledcWrite(amarilloChannel, 255); // enciende led amarilla
+
+    int dutyCycle = map(90, 0, 180, 26, 123); // mueve el servo a 90º
+    ledcWrite(pwmChannel, dutyCycle);
+    delay(5); // debounce
+  }
+  else
+  {
+    ledcWrite(rojoChannel, 255); // enciende led amarilla
+    ledcWrite(verdeChannel, 0);
+    ledcWrite(amarilloChannel, 0);
+
+    int dutyCycle = map(0, 0, 180, 26, 123); // mueve el servo a 0º
+    ledcWrite(pwmChannel, dutyCycle);
+    delay(5); // debounce
+  }
+
+  medirTemp = false; // que no siga obteniendo el valor de temp hasta volver a presionar el botón
+  delay(5);          // debounce
+  //********************************************************************************************************
+
+  // Display de 7 seg ****************************************************************************************
+  temp = temperatura * 10;
+  int decena = temp / 100;
+  temp = temp - (decena * 100);
+  int unidad = temp / 10;
+  temp = temp - (unidad * 10);
+  int decimal = temp;
+
+  desplegarValor(decena);
   digitalWrite(display1, HIGH);
   digitalWrite(display2, LOW);
   digitalWrite(display3, LOW);
-  desplegarVal(0);
+  delay(5);
 
+  desplegarValor(unidad);
   digitalWrite(display1, LOW);
   digitalWrite(display2, HIGH);
   digitalWrite(display3, LOW);
-  desplegarVal(1);
-  desplegarPunto(true);
+  desplegarPunto(HIGH);
+  delay(5);
 
+  desplegarValor(decimal);
   digitalWrite(display1, LOW);
   digitalWrite(display2, LOW);
   digitalWrite(display3, HIGH);
-  desplegarVal(2);
-
-  // Wait a bit before scanning again
-  delay(5000);*/
+  delay(5);
 }

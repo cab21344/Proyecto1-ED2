@@ -60,8 +60,7 @@ void setup()
   // start the serial connection
   Serial.begin(115200);
   // wait for serial monitor to open
-  while (!Serial)
-    ;
+  while (!Serial);
   Serial.print("Connecting to Adafruit IO");
 
   // Connect to io.adafruit.com ****************************************************************************
@@ -113,27 +112,25 @@ void setup()
 void loop()
 {
   // Parte 1, 2 y 3 ******************************************************************************************
-  int estadoBoton = digitalRead(botonPin);
+  int estadoBoton = digitalRead(botonPin); //verifica si se precionó el botón 
 
   if (estadoBoton == LOW)
-
   {
-    medirTemp = true;
+    medirTemp = true; //si se presiona el botón hace que se empieze a medir la temp
   }
 
   if (medirTemp)
   {
-
-    float valorTemp = analogRead(lm35Pin);
+    float valorTemp = analogRead(lm35Pin); //obtiene el valor del sensor
     Serial.print("ADC: ");
-    Serial.println(valorTemp);
+    Serial.println(valorTemp); //envía el valor obtenido del sensor
 
-    temperatura = (valorTemp * 3300.0) / (4095.0 * 10.0);
+    temperatura = (valorTemp * 3300.0) / (4095.0 * 10.0); //Convierte de ADC a ºC
     temperatura = temperatura + 10;
     Serial.print("Temperatura: ");
-    Serial.println(temperatura);
+    Serial.println(temperatura); //envía el valor convertido a ºC
 
-    medirTemp = false;
+    medirTemp = false; //cambia valor a false para que ya no mida temp
 
     // envia valor de temp a Adafruit ***********************************************************************
     io.run();                    // para que esté conectado al servidor de Adafruit
@@ -144,7 +141,7 @@ void loop()
 
   }
 
-  if (temperatura < 37.0)
+  if (temperatura < 37.0) //si la temp es menor a 37º
   {
     ledcWrite(rojoChannel, 0);
     ledcWrite(verdeChannel, 255); // enciende led verde
@@ -154,7 +151,7 @@ void loop()
     ledcWrite(pwmChannel, dutyCycle);
     delay(5); // debounce
   }
-  else if (temperatura >= 37.0 && temperatura < 37.5)
+  else if (temperatura >= 37.0 && temperatura < 37.5) //si la temp está entre 37º y 37.5º
   {
     ledcWrite(rojoChannel, 0);
     ledcWrite(verdeChannel, 0);
@@ -164,7 +161,7 @@ void loop()
     ledcWrite(pwmChannel, dutyCycle);
     delay(5); // debounce
   }
-  else
+  else //si la temp es mayor a 37º
   {
     ledcWrite(rojoChannel, 255); // enciende led amarilla
     ledcWrite(verdeChannel, 0);
@@ -181,28 +178,28 @@ void loop()
 
   // Display de 7 seg ****************************************************************************************
   temp = temperatura * 10;
-  int decena = temp / 100;
+  int decena = temp / 100; //operación para mostrar el valor de la decena
   temp = temp - (decena * 100);
-  int unidad = temp / 10;
+  int unidad = temp / 10; //operación para mostrar el valor de la unidad
   temp = temp - (unidad * 10);
-  int decimal = temp;
+  int decimal = temp; //operación para mostrar el valor de la decimal
 
-  desplegarValor(decena);
-  digitalWrite(display1, HIGH);
+  desplegarValor(decena); //despliega el valor de decena
+  digitalWrite(display1, HIGH); //se muestra el valor de decena en el display1
   digitalWrite(display2, LOW);
   digitalWrite(display3, LOW);
   delay(5);
 
-  desplegarValor(unidad);
+  desplegarValor(unidad); //despliega el valor de unidad
   digitalWrite(display1, LOW);
-  digitalWrite(display2, HIGH);
+  digitalWrite(display2, HIGH); //se muestra el valor de unidad en el display2
   digitalWrite(display3, LOW);
   desplegarPunto(HIGH);
   delay(5);
 
-  desplegarValor(decimal);
+  desplegarValor(decimal); //despliega el valor de decimal
   digitalWrite(display1, LOW);
   digitalWrite(display2, LOW);
-  digitalWrite(display3, HIGH);
+  digitalWrite(display3, HIGH); //se muestra el valor de decimal en el display3
   delay(5);
 }

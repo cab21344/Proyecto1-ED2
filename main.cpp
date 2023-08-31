@@ -126,7 +126,6 @@ void loop()
     Serial.println(valorTemp); //envía el valor obtenido del sensor
 
     temperatura = (valorTemp * 3300.0) / (4095.0 * 10.0); //Convierte de ADC a ºC
-    temperatura = temperatura + 10;
     Serial.print("Temperatura: ");
     Serial.println(temperatura); //envía el valor convertido a ºC
 
